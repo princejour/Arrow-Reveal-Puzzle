@@ -41,16 +41,57 @@ fun GameScreen(
         verticalArrangement =
             Arrangement.Center
 
-    ){
+    ) {
 
 
         Text(
 
             text =
-                "Level ${state.level}",
+                "Arrow Reveal Puzzle",
 
             fontSize =
                 28.sp
+
+        )
+
+
+        Spacer(
+            modifier =
+                Modifier.height(10.dp)
+        )
+
+
+        Text(
+
+            text =
+                "Level ${state.level}"
+
+        )
+
+
+        Spacer(
+            modifier =
+                Modifier.height(15.dp)
+        )
+
+
+        /*
+          منطقة كشف الصورة
+          حاليا تعتمد على نسبة التقدم
+          وسنربطها لاحقا بالمحرك
+        */
+        ImageRevealView(
+
+            state =
+                com.arrowreveal.puzzle.model.ImageRevealState(
+
+                    imageName =
+                        "lion",
+
+                    revealPercent =
+                        state.revealProgress * 100
+
+                )
 
         )
 
@@ -75,7 +116,6 @@ fun GameScreen(
         )
 
 
-
         Spacer(
             modifier =
                 Modifier.height(20.dp)
@@ -83,12 +123,17 @@ fun GameScreen(
 
 
 
-        if(state.isCompleted){
+        if(state.isCompleted) {
 
 
             Text(
+
                 text =
-                    "🎉 You Win!"
+                    "🎉 You Win!",
+
+                fontSize =
+                    26.sp
+
             )
 
 
@@ -100,7 +145,7 @@ fun GameScreen(
 
                 }
 
-            ){
+            ) {
 
                 Text(
                     "Next Level"
@@ -108,10 +153,7 @@ fun GameScreen(
 
             }
 
-
         }
-
-
 
     }
 

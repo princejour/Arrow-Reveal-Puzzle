@@ -2,7 +2,7 @@ package com.arrowreveal.puzzle.model
 
 
 /**
- * اتجاه السهم
+ * اتجاه السهم داخل القطعة
  */
 enum class Direction {
 
@@ -19,27 +19,43 @@ enum class Direction {
 
 
 /**
- * قطعة اللعبة
+ * قطعة اللغز الأساسية
  */
 data class Block(
 
-
+    /**
+     * معرف فريد للقطعة
+     */
     val id: Int,
 
 
+    /**
+     * موقع القطعة داخل الشبكة
+     */
     val row: Int,
-
 
     val column: Int,
 
 
+    /**
+     * اتجاه السهم
+     */
     val direction: Direction,
 
 
 
-    // هل القطعة تتحرك الآن؟
-    val isMoving: Boolean = false
+    /**
+     * حالة الحركة
+     * تستخدم عند خروج القطعة من اللوحة
+     */
+    val isMoving: Boolean = false,
 
 
+
+    /**
+     * حالة محاولة الحركة الفاشلة
+     * تستخدم للاهتزاز والوميض الأحمر
+     */
+    val isBlocked: Boolean = false
 
 )

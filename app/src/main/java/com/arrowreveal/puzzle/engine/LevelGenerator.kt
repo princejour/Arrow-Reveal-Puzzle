@@ -3,10 +3,14 @@ package com.arrowreveal.puzzle.engine
 import com.arrowreveal.puzzle.model.Block
 import com.arrowreveal.puzzle.model.Direction
 import com.arrowreveal.puzzle.model.GameState
-import com.arrowreveal.puzzle.model.ImagePattern
+import com.arrowreveal.puzzle.model.LevelConfig
 
 
 class LevelGenerator {
+
+
+    private val levelDatabase =
+        LevelDatabase()
 
 
     private val patternLibrary =
@@ -18,11 +22,20 @@ class LevelGenerator {
 
 
 
+    /**
+     * إنشاء مستوى كامل
+     */
     fun createLevel(
 
-        level: Int
+        levelNumber: Int
 
     ): GameState {
+
+
+        val config =
+            levelDatabase.getLevel(
+                levelNumber
+            )
 
 
         var attempts = 0
@@ -33,10 +46,9 @@ class LevelGenerator {
 
 
             val state =
-                generatePatternLevel(
-                    level
+                buildLevel(
+                    config
                 )
-
 
 
             if(
@@ -50,77 +62,67 @@ class LevelGenerator {
             }
 
 
-
             attempts++
 
         }
 
 
 
-        return generatePatternLevel(level)
+        return buildLevel(config)
 
     }
 
 
 
 
+    private fun buildLevel(
 
-    private fun generatePatternLevel(
-
-        level: Int
+        config: LevelConfig
 
     ): GameState {
 
 
-        val pattern =
-            choosePattern(level)
-
-
-
         val cells =
             patternLibrary.getPattern(
-                pattern
+                config.imagePattern
             )
 
 
 
         val blocks =
-            mutableListOf<Block>()
-
-
-
-        cells.forEachIndexed { index, cell ->
-
-
-            blocks.add(
-
-                Block(
-
-                    id = index,
-
-                    row = cell.row,
-
-                    column = cell.column,
-
-                    direction =
-                        directionForCell(
-                            cell.row,
-                            cell.column
-                        )
-
+            cells
+                .take(
+                    config.blockCount
                 )
+                .mapIndexed { index, cell ->
 
-            )
 
-        }
+                    Block(
+
+                        id = index,
+
+                        row = cell.row,
+
+                        column = cell.column,
+
+                        direction =
+                            getDirection(
+                                cell.row,
+                                cell.column,
+                                config.gridSize
+                            )
+
+                    )
+
+                }
 
 
 
         return GameState(
 
-            level = level,
+            level = config.level,
 
-            gridSize = 5,
+            gridSize = config.gridSize,
 
             blocks = blocks
 
@@ -132,30 +134,13 @@ class LevelGenerator {
 
 
 
-    private fun choosePattern(
-
-        level: Int
-
-    ): ImagePattern {
-
-
-        return ImagePattern.entries[
-            (level - 1)
-                %
-            ImagePattern.entries.size
-        ]
-
-    }
-
-
-
-
-
-    private fun directionForCell(
+    private fun getDirection(
 
         row: Int,
 
-        column: Int
+        column: Int,
+
+        size: Int
 
     ): Direction {
 
@@ -167,7 +152,7 @@ class LevelGenerator {
                 Direction.UP
 
 
-            row == 4 ->
+            row == size - 1 ->
                 Direction.DOWN
 
 
@@ -175,12 +160,27 @@ class LevelGenerator {
                 Direction.LEFT
 
 
-            column == 4 ->
+            column == size - 1 ->
                 Direction.RIGHT
 
 
             else ->
-                Direction.RIGHT
+
+                when((row + column) % 4){
+
+                    0 ->
+                        Direction.UP
+
+                    1 ->
+                        Direction.RIGHT
+
+                    2 ->
+                        Direction.DOWN
+
+                    else ->
+                        Direction.LEFT
+
+                }
 
         }
 

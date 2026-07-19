@@ -3,18 +3,14 @@ package com.arrowreveal.puzzle.engine
 import com.arrowreveal.puzzle.model.Block
 import com.arrowreveal.puzzle.model.Direction
 import com.arrowreveal.puzzle.model.GameState
-import kotlin.random.Random
+import com.arrowreveal.puzzle.model.ImagePattern
 
 
 class LevelGenerator {
 
 
-    private val solver =
-        PuzzleSolver()
-
-
-    private val engine =
-        PuzzleEngine()
+    private val patternLibrary =
+        PatternLibrary()
 
 
 
@@ -25,65 +21,16 @@ class LevelGenerator {
     ): GameState {
 
 
-        var attempts = 0
 
-
-        while(attempts < 100){
-
-
-            val state =
-                generateRandomLevel(
-                    level
-                )
-
-
-            if(
-                solver.hasPossibleMoves(
-                    state,
-                    engine
-                )
-            ){
-
-                return state
-
-            }
-
-
-            attempts++
-
-        }
-
-
-        // حل احتياطي إذا فشل التوليد
-        return generateRandomLevel(level)
-
-    }
+        val pattern =
+            choosePattern(level)
 
 
 
-
-    private fun generateRandomLevel(
-
-        level: Int
-
-    ): GameState {
-
-
-        val size = when {
-
-            level < 5 ->
-                4
-
-            level < 15 ->
-                5
-
-            level < 30 ->
-                6
-
-            else ->
-                7
-
-        }
+        val cells =
+            patternLibrary.getPattern(
+                pattern
+            )
 
 
 
@@ -91,41 +38,30 @@ class LevelGenerator {
             mutableListOf<Block>()
 
 
-        var id = 0
+
+        cells.forEachIndexed { index, cell ->
 
 
+            blocks.add(
 
-        for(row in 0 until size){
+                Block(
 
-            for(column in 0 until size){
+                    id = index,
 
+                    row = cell.row,
 
-                if(
-                    Random.nextFloat()
-                    < 0.55f
-                ){
+                    column = cell.column,
 
-
-                    blocks.add(
-
-                        Block(
-
-                            id = id++,
-
-                            row = row,
-
-                            column = column,
-
-                            direction =
-                                randomDirection()
-
+                    direction =
+                        directionForCell(
+                            cell.row,
+                            cell.column
                         )
 
-                    )
+                )
 
-                }
+            )
 
-            }
 
         }
 
@@ -135,7 +71,7 @@ class LevelGenerator {
 
             level = level,
 
-            gridSize = size,
+            gridSize = 5,
 
             blocks = blocks
 
@@ -146,12 +82,61 @@ class LevelGenerator {
 
 
 
-    private fun randomDirection():
 
-            Direction {
+    private fun choosePattern(
+
+        level: Int
+
+    ): ImagePattern {
 
 
-        return Direction.entries.random()
+        val patterns =
+            ImagePattern.entries
+
+
+        return patterns[
+            (level - 1)
+                % patterns.size
+        ]
+
+    }
+
+
+
+
+
+    private fun directionForCell(
+
+        row: Int,
+
+        column: Int
+
+    ): Direction {
+
+
+        return when {
+
+
+            row == 0 ->
+                Direction.UP
+
+
+            row == 4 ->
+                Direction.DOWN
+
+
+            column == 0 ->
+                Direction.LEFT
+
+
+            column == 4 ->
+                Direction.RIGHT
+
+
+            else ->
+                Direction.RIGHT
+
+        }
 
     }
 

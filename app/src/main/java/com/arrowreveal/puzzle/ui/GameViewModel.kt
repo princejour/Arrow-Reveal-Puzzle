@@ -1,6 +1,7 @@
 package com.arrowreveal.puzzle.ui
 
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
 import com.arrowreveal.puzzle.engine.ImageTileEngine
 import com.arrowreveal.puzzle.engine.LevelDatabase
 import com.arrowreveal.puzzle.engine.LevelGenerator
@@ -8,8 +9,10 @@ import com.arrowreveal.puzzle.engine.PuzzleEngine
 import com.arrowreveal.puzzle.model.Block
 import com.arrowreveal.puzzle.model.GameState
 import com.arrowreveal.puzzle.model.ImageTile
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.launch
 
 
 class GameViewModel : ViewModel() {
@@ -66,9 +69,7 @@ class GameViewModel : ViewModel() {
 
 
 
-    /**
-     * بداية مستوى
-     */
+
     private fun startLevel(){
 
 
@@ -78,17 +79,10 @@ class GameViewModel : ViewModel() {
             )
 
 
-
-        val state =
+        _gameState.value =
             levelGenerator.createLevel(
                 currentLevel
             )
-
-
-
-        _gameState.value =
-            state
-
 
 
         _imageTiles.value =
@@ -102,9 +96,6 @@ class GameViewModel : ViewModel() {
 
 
 
-    /**
-     * الضغط على قطعة
-     */
     fun selectBlock(
 
         block: Block
@@ -125,15 +116,77 @@ class GameViewModel : ViewModel() {
         ){
 
 
+            startMoveAnimation(block)
+
+
+        }
+
+    }
+
+
+
+
+
+    private fun startMoveAnimation(
+
+        block: Block
+
+    ){
+
+
+        viewModelScope.launch {
+
+
+            val movingBlocks =
+
+                _gameState.value.blocks.map {
+
+
+                    if(it.id == block.id)
+
+                        it.copy(
+                            isMoving = true
+                        )
+
+                    else
+
+                        it
+
+
+                }
+
+
+
             _gameState.value =
+
+                _gameState.value.copy(
+
+                    blocks = movingBlocks
+
+                )
+
+
+
+            // مدة الحركة
+
+            delay(350)
+
+
+
+            _gameState.value =
+
                 puzzleEngine.removeBlock(
+
                     block,
-                    state
+
+                    _gameState.value
+
                 )
 
 
 
             revealTile()
+
 
         }
 
@@ -151,7 +204,7 @@ class GameViewModel : ViewModel() {
 
 
 
-        val hidden =
+        val tile =
             tiles.firstOrNull {
 
                 !it.revealed
@@ -160,13 +213,17 @@ class GameViewModel : ViewModel() {
 
 
 
-        if(hidden != null){
+        if(tile != null){
 
 
             _imageTiles.value =
+
                 imageTileEngine.revealTile(
+
                     tiles,
-                    hidden.id
+
+                    tile.id
+
                 )
 
         }
@@ -177,14 +234,10 @@ class GameViewModel : ViewModel() {
 
 
 
-    /**
-     * الانتقال للمستوى التالي
-     */
     fun nextLevel(){
 
 
         currentLevel++
-
 
         startLevel()
 
@@ -192,10 +245,7 @@ class GameViewModel : ViewModel() {
 
 
 
-
-
     fun restart(){
-
 
         startLevel()
 

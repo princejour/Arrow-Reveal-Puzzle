@@ -2,6 +2,7 @@ package com.arrowreveal.puzzle.ui
 
 import androidx.lifecycle.ViewModel
 import com.arrowreveal.puzzle.engine.ImageTileEngine
+import com.arrowreveal.puzzle.engine.LevelDatabase
 import com.arrowreveal.puzzle.engine.LevelGenerator
 import com.arrowreveal.puzzle.engine.PuzzleEngine
 import com.arrowreveal.puzzle.model.Block
@@ -18,12 +19,20 @@ class GameViewModel : ViewModel() {
         LevelGenerator()
 
 
+    private val levelDatabase =
+        LevelDatabase()
+
+
     private val puzzleEngine =
         PuzzleEngine()
 
 
     private val imageTileEngine =
         ImageTileEngine()
+
+
+
+    private var currentLevel = 1
 
 
 
@@ -51,29 +60,40 @@ class GameViewModel : ViewModel() {
 
     init {
 
-        startNewLevel()
+        startLevel()
 
     }
 
 
 
-    fun startNewLevel(){
+    /**
+     * بداية مستوى
+     */
+    private fun startLevel(){
 
 
-        val newState =
-            levelGenerator.createLevel(
-                _gameState.value.level
+        val config =
+            levelDatabase.getLevel(
+                currentLevel
             )
 
 
+
+        val state =
+            levelGenerator.createLevel(
+                currentLevel
+            )
+
+
+
         _gameState.value =
-            newState
+            state
 
 
 
         _imageTiles.value =
             imageTileEngine.createTiles(
-                newState.gridSize
+                config.gridSize
             )
 
     }
@@ -81,6 +101,10 @@ class GameViewModel : ViewModel() {
 
 
 
+
+    /**
+     * الضغط على قطعة
+     */
     fun selectBlock(
 
         block: Block
@@ -88,7 +112,7 @@ class GameViewModel : ViewModel() {
     ){
 
 
-        val current =
+        val state =
             _gameState.value
 
 
@@ -96,25 +120,20 @@ class GameViewModel : ViewModel() {
         if(
             puzzleEngine.canRemove(
                 block,
-                current
+                state
             )
         ){
 
 
-            val updated =
+            _gameState.value =
                 puzzleEngine.removeBlock(
                     block,
-                    current
+                    state
                 )
 
 
-            _gameState.value =
-                updated
 
-
-
-            revealNextTile()
-
+            revealTile()
 
         }
 
@@ -124,33 +143,30 @@ class GameViewModel : ViewModel() {
 
 
 
-    private fun revealNextTile(){
+    private fun revealTile(){
 
 
-        val currentTiles =
+        val tiles =
             _imageTiles.value
 
 
 
         val hidden =
-            currentTiles.filter {
+            tiles.firstOrNull {
+
                 !it.revealed
+
             }
 
 
 
-        if(hidden.isNotEmpty()){
-
-
-            val tile =
-                hidden.first()
-
+        if(hidden != null){
 
 
             _imageTiles.value =
                 imageTileEngine.revealTile(
-                    currentTiles,
-                    tile.id
+                    tiles,
+                    hidden.id
                 )
 
         }
@@ -159,21 +175,31 @@ class GameViewModel : ViewModel() {
 
 
 
+
+
+    /**
+     * الانتقال للمستوى التالي
+     */
     fun nextLevel(){
 
-        _gameState.value =
-            levelGenerator.createLevel(
-                _gameState.value.level + 1
-            )
+
+        currentLevel++
+
+
+        startLevel()
 
     }
+
+
 
 
 
     fun restart(){
 
-        startNewLevel()
+
+        startLevel()
 
     }
+
 
 }

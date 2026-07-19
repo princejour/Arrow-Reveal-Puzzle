@@ -1,5 +1,6 @@
 package com.arrowreveal.puzzle.ui
 
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -9,10 +10,11 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.arrowreveal.puzzle.R
 import com.arrowreveal.puzzle.model.ImageRevealState
-
 
 
 @Composable
@@ -28,41 +30,47 @@ fun ImageRevealView(
         modifier =
             Modifier
                 .fillMaxWidth()
-                .height(180.dp)
+                .height(220.dp)
                 .background(
-                    Color.DarkGray
+                    Color.Black
                 ),
 
         contentAlignment =
             Alignment.Center
 
-    ){
+    ) {
 
 
-        Text(
+        Image(
 
-            text =
-                if(state.completed){
+            painter =
+                painterResource(
+                    id = R.drawable.image_placeholder
+                ),
 
-                    "🖼 ${state.imageName.uppercase()}"
-
-                }
-                else {
-
-                    "Hidden Image\n" +
-                    "${state.revealPercent.toInt()}% Revealed"
-
-                },
-
-
-            color =
-                Color.White,
-
-
-            fontSize =
-                24.sp
+            contentDescription =
+                state.imageName
 
         )
+
+
+        if(!state.completed) {
+
+
+            Text(
+
+                text =
+                    "${state.revealPercent.toInt()}%",
+
+                color =
+                    Color.White,
+
+                fontSize =
+                    30.sp
+
+            )
+
+        }
 
 
     }

@@ -1,142 +1,50 @@
-package com.arrowreveal.puzzle.engine
+private fun directionForCell(
 
-import com.arrowreveal.puzzle.model.Block
-import com.arrowreveal.puzzle.model.Direction
-import com.arrowreveal.puzzle.model.GameState
-import com.arrowreveal.puzzle.model.ImagePattern
+    row: Int,
 
+    column: Int
 
-class LevelGenerator {
+): Direction {
 
 
-    private val patternLibrary =
-        PatternLibrary()
+    return when {
 
 
+        // الحواف تخرج للخارج
+        row == 0 ->
+            Direction.UP
 
-    fun createLevel(
 
-        level: Int
+        row == 4 ->
+            Direction.DOWN
 
-    ): GameState {
 
+        column == 0 ->
+            Direction.LEFT
 
 
-        val pattern =
-            choosePattern(level)
+        column == 4 ->
+            Direction.RIGHT
 
 
 
-        val cells =
-            patternLibrary.getPattern(
-                pattern
-            )
+        // داخل الشكل:
+        // توزيع اتجاهات يخلق مسارات مختلفة
 
+        (row + column) % 4 == 0 ->
+            Direction.UP
 
 
-        val blocks =
-            mutableListOf<Block>()
+        (row + column) % 4 == 1 ->
+            Direction.RIGHT
 
 
+        (row + column) % 4 == 2 ->
+            Direction.DOWN
 
-        cells.forEachIndexed { index, cell ->
 
-
-            blocks.add(
-
-                Block(
-
-                    id = index,
-
-                    row = cell.row,
-
-                    column = cell.column,
-
-                    direction =
-                        directionForCell(
-                            cell.row,
-                            cell.column
-                        )
-
-                )
-
-            )
-
-
-        }
-
-
-
-        return GameState(
-
-            level = level,
-
-            gridSize = 5,
-
-            blocks = blocks
-
-        )
-
-    }
-
-
-
-
-
-    private fun choosePattern(
-
-        level: Int
-
-    ): ImagePattern {
-
-
-        val patterns =
-            ImagePattern.entries
-
-
-        return patterns[
-            (level - 1)
-                % patterns.size
-        ]
-
-    }
-
-
-
-
-
-    private fun directionForCell(
-
-        row: Int,
-
-        column: Int
-
-    ): Direction {
-
-
-        return when {
-
-
-            row == 0 ->
-                Direction.UP
-
-
-            row == 4 ->
-                Direction.DOWN
-
-
-            column == 0 ->
-                Direction.LEFT
-
-
-            column == 4 ->
-                Direction.RIGHT
-
-
-            else ->
-                Direction.RIGHT
-
-        }
+        else ->
+            Direction.LEFT
 
     }
 

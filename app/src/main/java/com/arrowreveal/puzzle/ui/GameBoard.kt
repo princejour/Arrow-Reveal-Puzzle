@@ -1,18 +1,20 @@
 package com.arrowreveal.puzzle.ui
 
-import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
-import androidx.compose.animation.fadeOut
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -42,9 +44,7 @@ fun GameBoard(
             ),
 
         modifier =
-            Modifier
-                .fillMaxWidth()
-                .padding(16.dp)
+            Modifier.fillMaxWidth()
 
     ){
 
@@ -60,39 +60,17 @@ fun GameBoard(
         ){ block ->
 
 
+            BlockView(
 
-            AnimatedVisibility(
+                block = block,
 
-                visible = true,
+                onClick = {
 
-                exit = fadeOut(
+                    onBlockClick(block)
 
-                    animationSpec =
-                        tween(
-                            durationMillis = 350
-                        )
+                }
 
-                )
-
-            ){
-
-
-
-                BlockView(
-
-                    block = block,
-
-                    onClick = {
-
-                        onBlockClick(block)
-
-                    }
-
-                )
-
-
-            }
-
+            )
 
         }
 
@@ -116,10 +94,72 @@ private fun BlockView(
 ){
 
 
-    androidx.compose.foundation.layout.Box(
+    val offsetValue by animateFloatAsState(
+
+        targetValue =
+
+            if(block.isMoving)
+
+                600f
+
+            else
+
+                0f,
+
+
+        animationSpec =
+
+            tween(
+                durationMillis = 350
+            ),
+
+        label = "slide"
+
+    )
+
+
+
+    val modifier =
+
+        when(block.direction){
+
+
+            Direction.UP ->
+
+                Modifier.offset(
+                    y = (-offsetValue).dp
+                )
+
+
+            Direction.DOWN ->
+
+                Modifier.offset(
+                    y = offsetValue.dp
+                )
+
+
+            Direction.LEFT ->
+
+                Modifier.offset(
+                    x = (-offsetValue).dp
+                )
+
+
+            Direction.RIGHT ->
+
+                Modifier.offset(
+                    x = offsetValue.dp
+                )
+
+        }
+
+
+
+    Box(
 
         modifier =
-            Modifier
+
+            modifier
 
                 .padding(4.dp)
 
@@ -130,10 +170,13 @@ private fun BlockView(
                 )
 
                 .clickable {
+
                     onClick()
+
                 },
 
         contentAlignment =
+
             Alignment.Center
 
     ){
@@ -142,46 +185,37 @@ private fun BlockView(
         Text(
 
             text =
-                directionIcon(
-                    block.direction
-                ),
+
+                when(block.direction){
+
+                    Direction.UP ->
+                        "⬆"
+
+                    Direction.DOWN ->
+                        "⬇"
+
+                    Direction.LEFT ->
+                        "⬅"
+
+                    Direction.RIGHT ->
+                        "➡"
+
+                },
+
 
             fontSize =
+
                 30.sp,
 
+
             color =
+
                 Color.White
 
         )
 
-    }
-
-}
-
-
-
-
-private fun directionIcon(
-
-    direction: Direction
-
-): String {
-
-
-    return when(direction){
-
-        Direction.UP ->
-            "⬆"
-
-        Direction.DOWN ->
-            "⬇"
-
-        Direction.LEFT ->
-            "⬅"
-
-        Direction.RIGHT ->
-            "➡"
 
     }
+
 
 }

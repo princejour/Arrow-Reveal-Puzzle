@@ -30,6 +30,11 @@ fun GameScreen(
 
 
 
+    val tiles by
+        gameViewModel.imageTiles.collectAsState()
+
+
+
     Column(
 
         modifier =
@@ -41,7 +46,8 @@ fun GameScreen(
         verticalArrangement =
             Arrangement.Center
 
-    ) {
+    ){
+
 
 
         Text(
@@ -55,10 +61,12 @@ fun GameScreen(
         )
 
 
+
         Spacer(
             modifier =
                 Modifier.height(10.dp)
         )
+
 
 
         Text(
@@ -69,31 +77,24 @@ fun GameScreen(
         )
 
 
+
         Spacer(
             modifier =
-                Modifier.height(15.dp)
+                Modifier.height(20.dp)
         )
 
 
-        /*
-          منطقة كشف الصورة
-          حاليا تعتمد على نسبة التقدم
-          وسنربطها لاحقا بالمحرك
-        */
+
         ImageRevealView(
 
-            state =
-                com.arrowreveal.puzzle.model.ImageRevealState(
+            tiles =
+                tiles,
 
-                    imageName =
-                        "lion",
-
-                    revealPercent =
-                        state.revealProgress * 100
-
-                )
+            gridSize =
+                state.gridSize
 
         )
+
 
 
         Spacer(
@@ -105,7 +106,8 @@ fun GameScreen(
 
         GameBoard(
 
-            state = state,
+            state =
+                state,
 
             onBlockClick = {
 
@@ -116,6 +118,7 @@ fun GameScreen(
         )
 
 
+
         Spacer(
             modifier =
                 Modifier.height(20.dp)
@@ -123,7 +126,8 @@ fun GameScreen(
 
 
 
-        if(state.isCompleted) {
+        if(state.isCompleted){
+
 
 
             Text(
@@ -137,6 +141,7 @@ fun GameScreen(
             )
 
 
+
             Button(
 
                 onClick = {
@@ -145,7 +150,7 @@ fun GameScreen(
 
                 }
 
-            ) {
+            ){
 
                 Text(
                     "Next Level"
@@ -153,7 +158,9 @@ fun GameScreen(
 
             }
 
+
         }
+
 
     }
 

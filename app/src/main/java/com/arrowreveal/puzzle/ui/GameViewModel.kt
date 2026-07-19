@@ -61,16 +61,21 @@ class GameViewModel : ViewModel() {
 
 
 
+
     init {
 
-        startLevel()
+        loadLevel()
 
     }
 
 
 
 
-    private fun startLevel(){
+
+    /**
+     * تحميل المستوى الحالي
+     */
+    private fun loadLevel(){
 
 
         val config =
@@ -96,6 +101,9 @@ class GameViewModel : ViewModel() {
 
 
 
+    /**
+     * اختيار قطعة
+     */
     fun selectBlock(
 
         block: Block
@@ -115,9 +123,12 @@ class GameViewModel : ViewModel() {
             )
         ){
 
+            moveBlock(block)
 
-            startMoveAnimation(block)
+        }
+        else {
 
+            showBlocked(block)
 
         }
 
@@ -127,7 +138,10 @@ class GameViewModel : ViewModel() {
 
 
 
-    private fun startMoveAnimation(
+    /**
+     * تشغيل حركة القطعة قبل حذفها
+     */
+    private fun moveBlock(
 
         block: Block
 
@@ -137,7 +151,7 @@ class GameViewModel : ViewModel() {
         viewModelScope.launch {
 
 
-            val movingBlocks =
+            val moving =
 
                 _gameState.value.blocks.map {
 
@@ -161,13 +175,11 @@ class GameViewModel : ViewModel() {
 
                 _gameState.value.copy(
 
-                    blocks = movingBlocks
+                    blocks = moving
 
                 )
 
 
-
-            // مدة الحركة
 
             delay(350)
 
@@ -185,7 +197,78 @@ class GameViewModel : ViewModel() {
 
 
 
-            revealTile()
+            revealImage()
+
+        }
+
+    }
+
+
+
+
+
+    /**
+     * حركة فاشلة
+     */
+    private fun showBlocked(
+
+        block: Block
+
+    ){
+
+
+        viewModelScope.launch {
+
+
+            val blocked =
+
+                _gameState.value.blocks.map {
+
+
+                    if(it.id == block.id)
+
+                        it.copy(
+                            isBlocked = true
+                        )
+
+                    else
+
+                        it
+
+
+                }
+
+
+
+            _gameState.value =
+
+                _gameState.value.copy(
+
+                    blocks = blocked
+
+                )
+
+
+
+            delay(200)
+
+
+
+            _gameState.value =
+
+                _gameState.value.copy(
+
+                    blocks =
+
+                        _gameState.value.blocks.map {
+
+                            it.copy(
+                                isBlocked = false
+                            )
+
+                        }
+
+                )
 
 
         }
@@ -196,7 +279,10 @@ class GameViewModel : ViewModel() {
 
 
 
-    private fun revealTile(){
+    /**
+     * كشف جزء من الصورة
+     */
+    private fun revealImage(){
 
 
         val tiles =
@@ -204,7 +290,7 @@ class GameViewModel : ViewModel() {
 
 
 
-        val tile =
+        val hidden =
             tiles.firstOrNull {
 
                 !it.revealed
@@ -213,7 +299,7 @@ class GameViewModel : ViewModel() {
 
 
 
-        if(tile != null){
+        if(hidden != null){
 
 
             _imageTiles.value =
@@ -222,7 +308,7 @@ class GameViewModel : ViewModel() {
 
                     tiles,
 
-                    tile.id
+                    hidden.id
 
                 )
 
@@ -234,20 +320,30 @@ class GameViewModel : ViewModel() {
 
 
 
+    /**
+     * المستوى التالي
+     */
     fun nextLevel(){
 
 
         currentLevel++
 
-        startLevel()
+
+        loadLevel()
 
     }
 
 
 
+
+
+    /**
+     * إعادة المستوى
+     */
     fun restart(){
 
-        startLevel()
+
+        loadLevel()
 
     }
 
